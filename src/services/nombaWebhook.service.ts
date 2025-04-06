@@ -12,7 +12,7 @@ function verifyWebhookSignature(req: Request, res: Response, next: NextFunction)
 
     const computedHash = crypto.createHmac(signatureAlgorithm, SIGNATURE_KEY)
         .update(payload)
-        .digest('hex');
+        .digest('hex'); 
 
     console.log(signature, computedHash);
 
