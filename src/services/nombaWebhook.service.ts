@@ -3,14 +3,14 @@ import { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const SIGNATURE_KEY = process.env.SIGNATURE_KEY || '';
+const SECRET_KEY = process.env.SECRET_KEY || '';
 
 function verifyWebhookSignature(req: Request, res: Response, next: NextFunction) {
     const payload = JSON.stringify(req.body);
     const signature = req.header('nomba-signature') || '';
     const signatureAlgorithm = req.header('nomba-signature-algorithm') === 'HmacSHA256' ? 'sha256' : 'sha512';
 
-    const computedHash = crypto.createHmac(signatureAlgorithm, SIGNATURE_KEY)
+    const computedHash = crypto.createHmac(signatureAlgorithm, SECRET_KEY)
         .update(payload)
         .digest('hex'); 
 
