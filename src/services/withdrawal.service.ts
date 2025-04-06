@@ -22,8 +22,9 @@ export const createWithdrawal = async (data: initiateWithdrawalType) => {
   return nombaWithdrawal;
 };
 
-export const withdrawalWebhook = async (data: any) => {
+export const withdrawalWebhook = async (data: any, headers: any) => {
   console.log(data);
+  console.log(headers);
   return true;
 }
 

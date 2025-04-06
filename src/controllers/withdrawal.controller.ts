@@ -17,7 +17,7 @@ export const createWithdrawal = async (req: Request, res: Response): Promise<any
 };
 
 export const withdrawalWebhook = async (req: Request, res: Response): Promise<any> => {
-  await WithdrawalService.withdrawalWebhook(req.body);
+  await WithdrawalService.withdrawalWebhook(req.body, req.headers);
   return res.status(200).json({ message: 'Withdrawal webhook received.' });
 };
 
