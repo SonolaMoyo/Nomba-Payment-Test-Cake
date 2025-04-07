@@ -31,10 +31,14 @@ function verifyWebhookSignature(req: Request, res: Response, next: NextFunction)
 function processNombaWebhook(data: any) {
     if(data.event_type == "payment_success") {
         processPaymentSuccess(data.data.order);
+    } else if(data.event_type == "payment_reversal") {
+        processPaymentReversal(data.data.order);
     } else if(data.event_type == "payment_failed") {
         processPaymentFailed(data.data.order);
     } else if(data.event_type == "payout_success") {
         processPayoutSuccess(data.data.transaction);
+    } else if(data.event_type == "payout_refund") {
+        processPayoutRefund(data.data.transaction);
     } else if(data.event_type == "payout_failed") {
         processPayoutFailed(data.data.transaction);
     }
@@ -66,6 +70,25 @@ async function processPaymentSuccess(order: any) {
     }
 }
 
+async function processPaymentReversal(order: any) {
+    try {
+        const transaction = await Transaction.findOneAndDelete({ reference: order.orderId });
+        if (!transaction) {
+            throw new Error('Transaction not found');
+        }
+        const funding = await Funding.findOne({ reference: order.orderId });
+        if (!funding) {
+            throw new Error('Funding not found');
+        }
+        await Funding.findByIdAndUpdate(funding._id, { status: 'failed' }, { new: true });
+        return true;
+    } catch (error) {
+        console.log('Error processing payment reversal:', error);
+        console.error('Error processing payment reversal:', error);
+        throw error;
+    }
+}
+
 async function processPaymentFailed(order: any) {
     try {
         const funding = await Funding.findOne({ reference: order.orderId });
@@ -83,7 +106,7 @@ async function processPaymentFailed(order: any) {
 
 async function processPayoutSuccess(transaction: any) {
     try {
-        const withdrawal = await Withdrawal.findOne({ reference: transaction.merchantTxRef });
+        const withdrawal = await Withdrawal.findOne({ reference: transaction.merchantTxRef, transactionId: transaction.transactionId });
         if (!withdrawal) {
             throw new Error('Withdrawal not found');
         }
@@ -96,6 +119,7 @@ async function processPayoutSuccess(transaction: any) {
                 type: 'debit',
                 source: 'nomba',
                 reference: transaction.merchantTxRef,
+                transactionId: transaction.transactionId,
                 narration: 'Withdrawal from Nomba'
             });
         }
@@ -103,6 +127,25 @@ async function processPayoutSuccess(transaction: any) {
     } catch (error) {
         console.log('Error processing successful payout:', error);
         console.error('Error processing successful payout:', error);
+        throw error;
+    }
+}
+
+async function processPayoutRefund(transaction: any) {
+    try {
+        const transactionRecord = await Transaction.findOneAndDelete({ transactionId: transaction.transactionId });
+        if (!transactionRecord) {
+            throw new Error('Transaction not found');
+        }
+        const withdrawal = await Withdrawal.findOne({ transactionId: transaction.transactionId });
+        if (!withdrawal) {
+            throw new Error('Withdrawal not found');
+        }
+        await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' }, { new: true });
+        return true;
+    } catch (error) {
+        console.log('Error processing payout refund:', error);
+        console.error('Error processing payout refund:', error);
         throw error;
     }
 }

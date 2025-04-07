@@ -6,6 +6,7 @@ const transactionSchema = new mongoose.Schema({
   type: { type: String, enum: ["credit", "debit"], required: true },
   source: String,
   reference: { type: String, unique: true, required: true },
+  transactionId: String, // for withdrawals
   narration: String,
   createdAt: { type: Date, default: Date.now }
 });

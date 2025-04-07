@@ -5,19 +5,12 @@ import { initiateWithdrawal } from './nombaAPI.service';
 import { initiateWithdrawalType } from '../types/withdrawal.type';
 import { Transaction } from '../models/transaction.model';
 import { processNombaWebhook } from './nombaWebhook.service';
+
 export const createWithdrawal = async (data: initiateWithdrawalType) => {
   const nombaWithdrawal = await initiateWithdrawal(data);
-  await Withdrawal.create({ userId: data.userId, amount: data.amount, status: 'pending', reference: data.systemRef});
+  await Withdrawal.create({ userId: data.userId, amount: data.amount, status: 'pending', reference: data.systemRef, transactionId: nombaWithdrawal.id });
   if (nombaWithdrawal.status === "SUCCESS") {
     await Withdrawal.findOneAndUpdate({ reference: data.systemRef }, { status: 'successful' }, { new: true });
-    await Transaction.create({
-      userId: data.userId,
-      amount: data.amount,
-      type: 'debit',
-      source: 'nomba',
-      reference: data.systemRef,
-      narration: data.narration
-    });
   }
   return nombaWithdrawal;
 };
