@@ -29,16 +29,17 @@ export const verifyFunding = async (reference: string) => {
   const nombaTransaction = await verifyTransaction(reference);
   if (nombaTransaction.success) {
     await Funding.findByIdAndUpdate(funding._id, { status: 'successful' }, { new: true });
-    const existingTransaction = await Transaction.findOne({ reference: nombaTransaction.orderReference });
+    const existingTransaction = await Transaction.findOne({ reference: nombaTransaction.order.orderId });
     if (!existingTransaction) {
-      await Transaction.create({
+      const transaction = await Transaction.create({
         userId: funding.userId,
         amount: funding.amount,
         type: 'credit',
         source: 'nomba',
-        reference: nombaTransaction.orderReference,
+        reference: nombaTransaction.order.orderId,
         narration: 'Funding from Nomba'
       });
+      console.log(transaction);
     }
   } else {
     await Funding.findByIdAndUpdate(funding._id, { status: 'failed' }, { new: true });

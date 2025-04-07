@@ -5,7 +5,7 @@ const transactionSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   type: { type: String, enum: ["credit", "debit"], required: true },
   source: String,
-  reference: { type: String, unique: true },
+  reference: { type: String, unique: true, required: true },
   narration: String,
   createdAt: { type: Date, default: Date.now }
 });
