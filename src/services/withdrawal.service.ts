@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { initiateWithdrawal } from './nombaAPI.service';
 import { initiateWithdrawalType } from '../types/withdrawal.type';
 import { Transaction } from '../models/transaction.model';
-
+import { processNombaWebhook } from './nombaWebhook.service';
 export const createWithdrawal = async (data: initiateWithdrawalType) => {
   const nombaWithdrawal = await initiateWithdrawal(data);
   await Withdrawal.create({ userId: data.userId, amount: data.amount, status: 'pending', reference: data.systemRef});
@@ -25,6 +25,7 @@ export const createWithdrawal = async (data: initiateWithdrawalType) => {
 export const withdrawalWebhook = async (data: any, headers: any) => {
   console.log(data);
   console.log(headers);
+  await processNombaWebhook(data);
   return true;
 }
 
