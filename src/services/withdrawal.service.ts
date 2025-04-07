@@ -1,13 +1,12 @@
 import { Withdrawal } from '../models/withdrawal.model';
 import { WithdrawalData } from '../types/withdrawal.type';
-import mongoose from 'mongoose';
 import { initiateWithdrawal } from './nombaAPI.service';
 import { initiateWithdrawalType } from '../types/withdrawal.type';
-import { Transaction } from '../models/transaction.model';
 import { processNombaWebhook } from './nombaWebhook.service';
 
 export const createWithdrawal = async (data: initiateWithdrawalType) => {
   const nombaWithdrawal = await initiateWithdrawal(data);
+  console.log('nombaWithdrawal', nombaWithdrawal);
   await Withdrawal.create({ userId: data.userId, amount: data.amount, status: 'pending', reference: data.systemRef, transactionId: nombaWithdrawal.id });
   if (nombaWithdrawal.status === "SUCCESS") {
     await Withdrawal.findOneAndUpdate({ reference: data.systemRef }, { status: 'successful' }, { new: true });

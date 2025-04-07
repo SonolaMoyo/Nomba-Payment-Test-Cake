@@ -4,8 +4,8 @@ const withdrawalSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   amount: Number,
   status: { type: String, enum: ["pending", "successful", "failed"], default: "pending" },
-  reference: String,
-  transactionId: String,
+  reference: { type: String, required: true },
+  transactionId: { type: String, required: true },
   requestedAt: { type: Date, default: Date.now }
 });
 

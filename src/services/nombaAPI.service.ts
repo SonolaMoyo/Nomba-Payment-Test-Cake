@@ -58,6 +58,7 @@ async function initiateWithdrawal(data: initiateWithdrawalType) {
   };
 
   const res: any = await axios.post(`${NOMBA_BASE_URL}/transfers/bank`, withdrawalData, { headers });
+  console.log('res nomba', res);
   return res.data.data;
 }
 

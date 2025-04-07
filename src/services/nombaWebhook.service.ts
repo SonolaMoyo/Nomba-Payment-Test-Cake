@@ -134,9 +134,6 @@ async function processPayoutSuccess(transaction: any) {
 async function processPayoutRefund(transaction: any) {
     try {
         const transactionRecord = await Transaction.findOneAndDelete({ transactionId: transaction.transactionId });
-        if (!transactionRecord) {
-            throw new Error('Transaction not found');
-        }
         const withdrawal = await Withdrawal.findOne({ transactionId: transaction.transactionId });
         if (!withdrawal) {
             throw new Error('Withdrawal not found');
